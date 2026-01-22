@@ -25,5 +25,7 @@ class ProductService {
     if (response.statusCode != 200) {
       throw Exception("Gagal menghapus product");
     }
+
+    print("Response hapus: ${response.body}");
   }
 }

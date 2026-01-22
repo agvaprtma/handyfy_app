@@ -225,7 +225,7 @@ class _ProductListPageState extends State<ProductListPage> {
 
                             // ✅ TOMBOL DELETE / HAPUS
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.delete_outline,
                                 color: Colors.red,
                               ),
@@ -236,46 +236,67 @@ class _ProductListPageState extends State<ProductListPage> {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    title: const Text("Hapus Product"),
-                                    content: const Text(
+                                    title: Text("Hapus Product"),
+                                    content: Text(
                                       "Apakah kamu yakin ingin menghapus data ini?",
                                     ),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.pop(context),
-                                        child: const Text("Batal"),
+                                        child: Text("Batal"),
                                       ),
                                       ElevatedButton(
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.red,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                          ),
+                                          foregroundColor: Colors.white,
                                         ),
-                                        onPressed: () async {
-                                          Navigator.pop(context);
-                                          await ProductService.hapusProduct(
-                                            product.id,
-                                          );
-
-                                          setState(() {
-                                            futureProducts =
-                                                ProductService.fetchProducts();
-                                          });
-
-                                          ScaffoldMessenger.of(
+                                        onPressed: () {
+                                          Navigator.of(
                                             context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                "Product berhasil dihapus",
-                                              ),
-                                            ),
-                                          );
+                                          ).pop(); // tutup dialog
+
+                                          Future.microtask(() async {
+                                            try {
+                                              await ProductService.hapusProduct(
+                                                product.id,
+                                              );
+
+                                              final newData =
+                                                  await ProductService.fetchProducts();
+
+                                              if (!mounted) return;
+
+                                              setState(() {
+                                                futureProducts = Future.value(
+                                                  newData,
+                                                );
+                                              });
+
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    "Product berhasil dihapus",
+                                                  ),
+                                                ),
+                                              );
+                                            } catch (e) {
+                                              if (!mounted) return;
+
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    "Gagal hapus: $e",
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          });
                                         },
-                                        child: const Text("Hapus", style: TextStyle(color: Colors.white),),
+                                        child: Text("Hapus"),
                                       ),
                                     ],
                                   ),
